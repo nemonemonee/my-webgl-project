@@ -141,7 +141,7 @@ function VBObox0() {
 	this.vboContents = //---------------------------------------------------------
 	new Float32Array ([						// Array of vertex attribute values we will
   															// transfer to GPU's vertex buffer object (VBO)
-	// 1st triangle:
+
   	 0.0,	 0.0,	0.0, 1.0,		1.0, 1.0, 1.0, //1 vertex:pos x,y,z,w; color: r,g,b  X AXIS
      1.0,  0.0, 0.0, 1.0,		1.0, 0.0, 0.0,
      
@@ -199,7 +199,7 @@ function VBObox0() {
 	this.a_ColrLoc;								// GPU location for 'a_Colr0' attribute
 
 	            //---------------------- Uniform locations &values in our shaders
-	this.ModelMat = new Matrix4();	// Transforms CVV axes to model axes.
+	this.ModelMat = mat4.create();	// Transforms CVV axes to model axes.
 	this.u_ModelMatLoc;							// GPU location for u_ModelMat uniform
 }
 
@@ -283,7 +283,7 @@ VBObox0.prototype.init = function() {
   if (!this.u_ModelMatLoc) { 
     console.log(this.constructor.name + 
     						'.init() failed to get GPU location for u_ModelMat1 uniform');
-    return;
+
   }  
 }
 
@@ -376,18 +376,24 @@ VBObox0.prototype.adjust = function() {
   }  
 	// Adjust values for our uniforms,
 
-		this.ModelMat.setIdentity();
+		// this.ModelMat.setIdentity();
+        mat4.identity(this.ModelMat);
 // THIS DOESN'T WORK!!  this.ModelMatrix = g_worldMat;
   this.ModelMat.set(g_worldMat);	// use our global, shared camera.
+    // console.log("world,", g_worldMat);
+    // console.log(this.ModelMat);
 // READY to draw in 'world' coord axes.
 	
 //  this.ModelMat.rotate(g_angleNow0, 0, 0, 1);	  // rotate drawing axes,
 //  this.ModelMat.translate(0.35, 0, 0);							// then translate them.
   //  Transfer new uniforms' values to the GPU:-------------
-  // Send  new 'ModelMat' values to the GPU's 'u_ModelMat1' uniform: 
+  // Send  new 'ModelMat' values to the GPU's 'u_ModelMat1' uniform:
+
+  // console.log(this.ModelMat);
+  // console.log(mat4.create());
   gl.uniformMatrix4fv(this.u_ModelMatLoc,	// GPU location of the uniform
   										false, 				// use matrix transpose instead?
-  										this.ModelMat.elements);	// send data from Javascript.
+      this.ModelMat);	// send data from Javascript.
   // Adjust the attributes' stride and offset (if necessary)
   // (use gl.vertexAttribPointer() calls and gl.enableVertexAttribArray() calls)
 }
@@ -584,9 +590,9 @@ function VBObox1() {
 	this.a_PtSiz1Loc;							// GPU location: shader 'a_PtSiz1' attribute
 	
 	            //---------------------- Uniform locations &values in our shaders
-	this.ModelMatrix = new Matrix4();	// Transforms CVV axes to model axes.
+	this.ModelMatrix = mat4.create();	// Transforms CVV axes to model axes.
 	this.u_ModelMatrixLoc;						// GPU location for u_ModelMat uniform
-};
+}
 
 
 VBObox1.prototype.init = function() {
@@ -675,7 +681,7 @@ VBObox1.prototype.init = function() {
   if (!this.u_ModelMatrixLoc) { 
     console.log(this.constructor.name + 
     						'.init() failed to get GPU location for u_ModelMatrix uniform');
-    return;
+
   }
 }
 
@@ -770,17 +776,23 @@ VBObox1.prototype.adjust = function() {
   						'.adjust() call you needed to call this.switchToMe()!!');
   }
 	// Adjust values for our uniforms,
-	this.ModelMatrix.setIdentity();
+	// this.ModelMatrix.setIdentity();
+
+  mat4.identity(this.ModelMatrix);
 // THIS DOESN'T WORK!!  this.ModelMatrix = g_worldMat;
   this.ModelMatrix.set(g_worldMat);
 
 //  this.ModelMatrix.rotate(g_angleNow1, 0, 0, 1);	// -spin drawing axes,
-  this.ModelMatrix.translate(1.0, -2.0, 0);						// then translate them.
+    var translation = vec3.create();
+    vec3.set(translation,1.0, -2.0, 0);
+    mat4.translate(this.ModelMatrix, this.ModelMatrix, translation);
+    // console.log(this.ModelMatrix);
+  // this.ModelMatrix.translate(1.0, -2.0, 0);						// then translate them.
   //  Transfer new uniforms' values to the GPU:-------------
   // Send  new 'ModelMat' values to the GPU's 'u_ModelMat1' uniform: 
   gl.uniformMatrix4fv(this.u_ModelMatrixLoc,	// GPU location of the uniform
   										false, 										// use matrix transpose instead?
-  										this.ModelMatrix.elements);	// send data from Javascript.
+  										this.ModelMatrix);	// send data from Javascript.
 }
 
 VBObox1.prototype.draw = function() {
@@ -938,9 +950,9 @@ function VBObox2() {
 	this.a_PtSizeLoc;								// GPU location: shader 'a_PtSize' attribute
 	
 	            //---------------------- Uniform locations &values in our shaders
-	this.ModelMatrix = new Matrix4();	// Transforms CVV axes to model axes.
+	this.ModelMatrix = mat4.create();	// Transforms CVV axes to model axes.
 	this.u_ModelMatrixLoc;						// GPU location for u_ModelMat uniform
-};
+}
 
 
 VBObox2.prototype.init = function() {
@@ -1028,7 +1040,7 @@ VBObox2.prototype.init = function() {
   if (!this.u_ModelMatrixLoc) { 
     console.log(this.constructor.name + 
     						'.init() failed to get GPU location for u_ModelMatrix uniform');
-    return;
+
   }
 }
 
@@ -1126,15 +1138,21 @@ VBObox2.prototype.adjust = function() {
 	// Adjust values for our uniforms;-------------------------------------------
 // THIS DOESN'T WORK!!  this.ModelMatrix = g_worldMat;
   this.ModelMatrix.set(g_worldMat);
+  // mat4.identity(this.ModelMatrix);
 	// Ready to draw in World coord axes.
-
-  this.ModelMatrix.translate(-0.3, 0.0, 0.0); //Shift origin leftwards,
-  this.ModelMatrix.rotate(g_angleNow2, 0, 0, 1);	// -spin drawing axes,
+    var translation = vec3.create();
+    vec3.set(translation,-0.3, 0.0, 0.0);
+    mat4.translate(this.ModelMatrix, this.ModelMatrix, translation);
+  // this.ModelMatrix.translate(-0.3, 0.0, 0.0); //Shift origin leftwards,
+    var rotation_axis = vec3.create();
+    vec3.set(rotation_axis,0,0,1);
+    mat4.rotate(this.ModelMatrix,this.ModelMatrix,g_angleNow2/180*Math.PI,rotation_axis);
+  // this.ModelMatrix.rotate(g_angleNow2, 0, 0, 1);	// -spin drawing axes,
   //  Transfer new uniforms' values to the GPU:--------------------------------
   // Send  new 'ModelMat' values to the GPU's 'u_ModelMat1' uniform: 
   gl.uniformMatrix4fv(this.u_ModelMatrixLoc,	  // GPU location of the uniform
   										false, 										// use matrix transpose instead?
-  										this.ModelMatrix.elements);	// send data from Javascript.
+  										this.ModelMatrix);	// send data from Javascript.
   // Adjust values in VBOcontents array-----------------------------------------
   // Make one dot-size grow/shrink;
   this.vboContents[15] = 15.0*(1.0 + Math.cos(Math.PI * 3.0 * g_angleNow1 / 180.0)); // radians
