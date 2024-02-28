@@ -138,27 +138,65 @@ function VBObox0() {
     gl_FragColor = vec4(v_Colr0, 1.0);
   }`;
 
-	this.vboContents = //---------------------------------------------------------
-	new Float32Array ([						// Array of vertex attribute values we will
-  															// transfer to GPU's vertex buffer object (VBO)
+  var xcount = 1000;			
+  var ycount = 1000;
+  var xymax = 200.0;			
+  var xColr = new Float32Array([1.0, 1.0, 0.3]);
+  var yColr = new Float32Array([1.0, 0.5, 1.0]);
+  var floatsPerVertex = 7;
+  this.vboVerts = 2 * (xcount + ycount + 3);
+  this.vboContents = new Float32Array(floatsPerVertex * this.vboVerts);
 
-  	 0.0,	 0.0,	0.0, 1.0,		1.0, 1.0, 1.0, //1 vertex:pos x,y,z,w; color: r,g,b  X AXIS
-     1.0,  0.0, 0.0, 1.0,		1.0, 0.0, 0.0,
-     
-  	 0.0,	 0.0,	0.0, 1.0,		1.0, 1.0, 1.0, // Y AXIS
-     0.0,  1.0, 0.0, 1.0,		0.0, 1.0, 0.0,
-     
-  	 0.0,	 0.0,	0.0, 1.0,		1.0, 1.0, 1.0, // Z AXIS
-     0.0,  0.0, 1.0, 1.0,		0.0, 0.2, 1.0,
-     
-     // 2 long lines of the ground grid:
-  	 -100.0,   0.2,	0.0, 1.0,		1.0, 0.2, 0.0, // horiz line
-      100.0,   0.2, 0.0, 1.0,		0.0, 0.2, 1.0,
-  	  0.2,	-100.0,	0.0, 1.0,		0.0, 1.0, 0.0, // vert line
-      0.2,   100.0, 0.0, 1.0,		1.0, 0.0, 1.0,
-		 ]);
+  var xgap = xymax / (xcount - 1);
+  var ygap = xymax / (ycount - 1);
+  
+  axVerts = new Float32Array([
+    0, 0, 0, 1, 1, 1, 1, 
+    1, 0, 0, 1, 1, 0, 0, 
+    0, 0, 0, 1, 1, 1, 1, 
+    0, 1, 0, 1, 0, 1, 0, 
+    0, 0, 0, 1, 1, 1, 1, 
+    0, 0, 1, 1, 0, 0, 1.
+  ]);
 
-	this.vboVerts = 10;						// # of vertices held in 'vboContents' array
+  for (j = 0; j < 42; j++){
+    this.vboContents[j] = axVerts[j];
+  }
+
+  for (v = 0; v < 2 * xcount;  v++, j += floatsPerVertex) {
+      if (v % 2 == 0) {	
+          this.vboContents[j] = -xymax + (v) * xgap;	
+          this.vboContents[j + 1] = -xymax;								
+          this.vboContents[j + 2] = 0.0;									
+          this.vboContents[j + 3] = 1.0;									
+      }
+      else {				
+        this.vboContents[j] = -xymax + (v - 1) * xgap;	
+        this.vboContents[j + 1] = xymax;								
+        this.vboContents[j + 2] = 0.0;									
+        this.vboContents[j + 3] = 1.0;									
+      }
+      this.vboContents[j + 4] = xColr[0];			
+      this.vboContents[j + 5] = xColr[1];			
+      this.vboContents[j + 6] = xColr[2];			
+  }
+  for (v = 0; v < 2 * ycount; v++, j += floatsPerVertex) {
+      if (v % 2 == 0) {		
+        this.vboContents[j] = -xymax;								
+        this.vboContents[j + 1] = -xymax + (v) * ygap;	
+        this.vboContents[j + 2] = 0.0;									
+        this.vboContents[j + 3] = 1.0;									
+      }
+      else {					
+        this.vboContents[j] = xymax;								
+        this.vboContents[j + 1] = -xymax + (v - 1) * ygap;	
+        this.vboContents[j + 2] = 0.0;									
+        this.vboContents[j + 3] = 1.0;									
+      }
+      this.vboContents[j + 4] = yColr[0];			
+      this.vboContents[j + 5] = yColr[1];			
+      this.vboContents[j + 6] = yColr[2];			
+  }
 	this.FSIZE = this.vboContents.BYTES_PER_ELEMENT;
 	                              // bytes req'd by 1 vboContents array element;
 																// (why? used to compute stride and offset 
@@ -168,6 +206,7 @@ function VBObox0() {
                                 // (#  of floats in vboContents array) * 
                                 // (# of bytes/float).
 	this.vboStride = this.vboBytes / this.vboVerts; 
+  console.log(this.vboStride );
 	                              // (== # of bytes to store one complete vertex).
 	                              // From any attrib in a given vertex in the VBO, 
 	                              // move forward by 'vboStride' bytes to arrive 

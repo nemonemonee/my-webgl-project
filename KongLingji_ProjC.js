@@ -45,10 +45,10 @@ var g_show2 = 1;                //  "         "     VBO2    "       "       "
 
 
 g_worldMat = mat4.create();
-var fovy = 42 / 180 * Math.PI;
-var aspect = 1.0;
+var fovy = 40 / 180 * Math.PI;
 var z_near = 1.0;
 var z_far = 200.0;
+var projectionMat = mat4.create();
 
 var eye = vec3.create();
 var look_at = vec3.create();
@@ -56,6 +56,9 @@ var up = vec3.create();
 vec3.set(eye, 5.0, 5.0, 3.0);
 vec3.set(look_at, 0.0, 0.0, 0.0);
 vec3.set(up, 0.0, 0.0, 1.0);
+
+var camera_translation_ratio = .05;
+var camera_rotation_ratio = .02;
 
 
 function main() {
@@ -96,11 +99,11 @@ function main() {
     // including ground-plane,
     gouraudBox.init(gl);		//  "		"		"  for 1st kind of shading & lighting
     phongBox.init(gl);    //  "   "   "  for 2nd kind of shading & lighting
-
+    
     setCamera();				// TEMPORARY: set a global camera used by ALL VBObox objects...
 
     gl.clearColor(0.2, 0.2, 0.2, 1);	  // RGBA color for clearing <canvas>
-
+    
     // ==============ANIMATION=============
     // Quick tutorials on synchronous, real-time animation in JavaScript/HTML-5:
     //    https://webglfundamentals.org/webgl/lessons/webgl-animation.html
@@ -119,15 +122,61 @@ function main() {
     //			to the ACTUAL time interval between displayed frames instead of fixed
     //		 	fixed-time 'setInterval()' calls that may take longer than expected.
     //------------------------------------
+
+    document.addEventListener('keydown', function(event) {
+      switch (event.key) {
+          case 'w' :
+          case 'W' : 
+              move(1);
+              break;
+          case 's' :
+          case 'S' :  
+              move(0);
+              break;
+          case 'a' :
+          case 'A' :
+              strafe(1);
+              break;
+          case 'd' :
+          case 'D' :
+              strafe(0);
+              break;
+          case 'q' :
+          case 'Q' :
+          case'ArrowLeft':
+              turn(1);
+              break
+          case 'e' :
+          case 'E' :
+          case 'ArrowRight':
+              turn(0);
+              break
+          case 'ArrowUp':
+              tilt(0);
+              break;
+          case 'ArrowDown':
+              tilt(1);
+              break;
+          case 'i':
+          case 'I':
+              zoom(1);
+              break;
+          case 'o':
+          case 'O':
+              zoom(0);
+              break;
+      }
+      updateCamera();
+    });
     var tick = function () {		    // locally (within main() only), define our
         // self-calling animation function.
         requestAnimationFrame(tick, g_canvasID); // browser callback request; wait
         // til browser is ready to re-draw canvas, then
         timerAll();  // Update all time-varying params, and
-        drawAll();                // Draw all the VBObox contents
+        drawAndResize();               // Draw all the VBObox contents
     };
-    //------------------------------------
-    tick();                       // do it again!
+    tick();  
+    drawAndResize();                   // do it again!
 }
 
 function timerAll() {
@@ -184,8 +233,8 @@ function timerAll() {
 function drawAll() {
 //=============================================================================
     // Clear on-screen HTML-5 <canvas> object:
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     var b4Draw = Date.now();
     var b4Wait = b4Draw - g_lastMS;
 
@@ -209,6 +258,14 @@ function drawAll() {
     var drawWait = aftrDraw - b4Draw;
     console.log("wait b4 draw: ", b4Wait, "drawWait: ", drawWait, "mSec");
     */
+}
+
+function drawAndResize() {
+  var xtraMargin = 20;
+  g_canvasID.width = innerWidth - xtraMargin;
+  g_canvasID.height = (innerHeight * .7) - xtraMargin;
+  setCamera();
+  drawAll();
 }
 
 function VBO0toggle() {
@@ -236,10 +293,73 @@ function VBO2toggle() {
 }
 
 function setCamera() {
+    gl.viewport(0,
+      0,
+      g_canvasID.width,
+      g_canvasID.height);
+    var aspect = g_canvasID.width / g_canvasID.height;
     mat4.identity(g_worldMat);
-    var projectionMat = mat4.create();
+    // var aspect = (innerWidth - xtraMargin) / ((innerHeight * .7) - xtraMargin);
     mat4.perspective(projectionMat, fovy, aspect, z_near, z_far);
+    updateCamera();
+}
+
+
+function updateCamera() {
     var lookAtMat = mat4.create();
     mat4.lookAt(lookAtMat, eye, look_at, up);
     mat4.multiply(g_worldMat, projectionMat, lookAtMat);
+}
+
+function calculate_gaze() {
+  var neg_eye = vec3.create();
+  vec3.negate(neg_eye, eye);
+  var gaze = vec3.create();
+  vec3.add(gaze, look_at, neg_eye);
+  vec3.normalize(gaze, gaze);
+  return gaze;
+}
+
+function strafe(dir){
+  dir = dir * 2 - 1;
+  var left = vec3.create();
+  vec3.cross(left, up, calculate_gaze());
+  left[2] = 0;
+  if (vec3.length(left) != 0)    vec3.normalize(left, left);
+  else vec3.set(left, -1, 0, 0);
+  vec3.scaleAndAdd(eye, eye, left, camera_translation_ratio * dir);
+  vec3.scaleAndAdd(look_at, look_at, left, camera_translation_ratio * dir);
+}
+
+function move(dir) {
+  dir = dir * 2 - 1;
+  var gaze = calculate_gaze();
+  var forward = vec3.create();
+  vec3.set(forward, gaze[0], gaze[1], 0);
+  if (vec3.length(forward) != 0)    vec3.normalize(forward, forward);
+  else vec3.set(forward, 0, 1, 0);
+  vec3.scaleAndAdd(eye, eye, forward, camera_translation_ratio * dir);
+  vec3.scaleAndAdd(look_at, look_at, forward, camera_translation_ratio * dir);
+}
+
+function turn(dir) {
+  dir = dir * 2 - 1;
+  var q = quat.create();
+  quat.setAxisAngle(q, up, camera_rotation_ratio * dir);
+  var gaze = calculate_gaze();
+  vec3.transformQuat(gaze, gaze, q);
+  vec3.add(look_at, eye, gaze);
+}
+
+function tilt(dir) {
+  dir = dir * 2 - 1;
+  var gaze = calculate_gaze();
+  var right = vec3.create();
+  vec3.cross(right, up, gaze);
+  if (vec3.length(right) != 0)    vec3.normalize(right, right);
+  else vec3.set(right, 1, 0, 0);
+  var q = quat.create();
+  quat.setAxisAngle(q, right, camera_rotation_ratio * dir);
+  vec3.transformQuat(gaze, gaze, q);
+  vec3.add(look_at, eye, gaze);
 }
