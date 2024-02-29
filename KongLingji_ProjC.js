@@ -59,6 +59,10 @@ vec3.set(up, 0.0, 0.0, 1.0);
 
 var camera_translation_ratio = .05;
 var camera_rotation_ratio = .02;
+var gaze = vec3.create();
+var left = vec3.create();
+
+var turned = true;
 
 
 function main() {
@@ -99,11 +103,11 @@ function main() {
     // including ground-plane,
     gouraudBox.init(gl);		//  "		"		"  for 1st kind of shading & lighting
     phongBox.init(gl);    //  "   "   "  for 2nd kind of shading & lighting
-    
+
     setCamera();				// TEMPORARY: set a global camera used by ALL VBObox objects...
 
     gl.clearColor(0.2, 0.2, 0.2, 1);	  // RGBA color for clearing <canvas>
-    
+
     // ==============ANIMATION=============
     // Quick tutorials on synchronous, real-time animation in JavaScript/HTML-5:
     //    https://webglfundamentals.org/webgl/lessons/webgl-animation.html
@@ -123,50 +127,50 @@ function main() {
     //		 	fixed-time 'setInterval()' calls that may take longer than expected.
     //------------------------------------
 
-    document.addEventListener('keydown', function(event) {
-      switch (event.key) {
-          case 'w' :
-          case 'W' : 
-              move(1);
-              break;
-          case 's' :
-          case 'S' :  
-              move(0);
-              break;
-          case 'a' :
-          case 'A' :
-              strafe(1);
-              break;
-          case 'd' :
-          case 'D' :
-              strafe(0);
-              break;
-          case 'q' :
-          case 'Q' :
-          case'ArrowLeft':
-              turn(1);
-              break
-          case 'e' :
-          case 'E' :
-          case 'ArrowRight':
-              turn(0);
-              break
-          case 'ArrowUp':
-              tilt(0);
-              break;
-          case 'ArrowDown':
-              tilt(1);
-              break;
-          case 'i':
-          case 'I':
-              zoom(1);
-              break;
-          case 'o':
-          case 'O':
-              zoom(0);
-              break;
-      }
-      updateCamera();
+    document.addEventListener('keydown', function (event) {
+        switch (event.key) {
+            case 'w' :
+            case 'W' :
+                move(1);
+                break;
+            case 's' :
+            case 'S' :
+                move(0);
+                break;
+            case 'a' :
+            case 'A' :
+                strafe(1);
+                break;
+            case 'd' :
+            case 'D' :
+                strafe(0);
+                break;
+            case 'q' :
+            case 'Q' :
+            case'ArrowLeft':
+                turn(1);
+                break
+            case 'e' :
+            case 'E' :
+            case 'ArrowRight':
+                turn(0);
+                break
+            case 'ArrowUp':
+                tilt(0);
+                break;
+            case 'ArrowDown':
+                tilt(1);
+                break;
+            case 'i':
+            case 'I':
+                zoom(1);
+                break;
+            case 'o':
+            case 'O':
+                zoom(0);
+                break;
+        }
+        updateCamera();
     });
     var tick = function () {		    // locally (within main() only), define our
         // self-calling animation function.
@@ -175,7 +179,7 @@ function main() {
         timerAll();  // Update all time-varying params, and
         drawAndResize();               // Draw all the VBObox contents
     };
-    tick();  
+    tick();
     drawAndResize();                   // do it again!
 }
 
@@ -261,17 +265,17 @@ function drawAll() {
 }
 
 function drawAndResize() {
-  var xtraMargin = 20;
-  g_canvasID.width = innerWidth - xtraMargin;
-  g_canvasID.height = (innerHeight * .7) - xtraMargin;
-  setCamera();
-  drawAll();
+    var xtraMargin = 20;
+    g_canvasID.width = innerWidth - xtraMargin;
+    g_canvasID.height = (innerHeight * .7) - xtraMargin;
+    setCamera();
+    drawAll();
 }
 
 function VBO0toggle() {
 //=============================================================================
 // Called when user presses HTML-5 button 'Show/Hide VBO0'.
-    if (g_show0 != 1) g_show0 = 1;				// show,
+    if (g_show0 !== 1) g_show0 = 1;				// show,
     else g_show0 = 0;										// hide.
     console.log('g_show0: ' + g_show0);
 }
@@ -279,7 +283,7 @@ function VBO0toggle() {
 function VBO1toggle() {
 //=============================================================================
 // Called when user presses HTML-5 button 'Show/Hide VBO1'.
-    if (g_show1 != 1) g_show1 = 1;			// show,
+    if (g_show1 !== 1) g_show1 = 1;			// show,
     else g_show1 = 0;									// hide.
     console.log('g_show1: ' + g_show1);
 }
@@ -287,16 +291,16 @@ function VBO1toggle() {
 function VBO2toggle() {
 //=============================================================================
 // Called when user presses HTML-5 button 'Show/Hide VBO2'.
-    if (g_show2 != 1) g_show2 = 1;			// show,
+    if (g_show2 !== 1) g_show2 = 1;			// show,
     else g_show2 = 0;									// hide.
     console.log('g_show2: ' + g_show2);
 }
 
 function setCamera() {
     gl.viewport(0,
-      0,
-      g_canvasID.width,
-      g_canvasID.height);
+        0,
+        g_canvasID.width,
+        g_canvasID.height);
     var aspect = g_canvasID.width / g_canvasID.height;
     mat4.identity(g_worldMat);
     // var aspect = (innerWidth - xtraMargin) / ((innerHeight * .7) - xtraMargin);
@@ -309,57 +313,53 @@ function updateCamera() {
     var lookAtMat = mat4.create();
     mat4.lookAt(lookAtMat, eye, look_at, up);
     mat4.multiply(g_worldMat, projectionMat, lookAtMat);
+    calculate_gaze();
 }
 
 function calculate_gaze() {
-  var neg_eye = vec3.create();
-  vec3.negate(neg_eye, eye);
-  var gaze = vec3.create();
-  vec3.add(gaze, look_at, neg_eye);
-  vec3.normalize(gaze, gaze);
-  return gaze;
+    var neg_eye = vec3.create();
+    vec3.negate(neg_eye, eye);
+    vec3.add(gaze, look_at, neg_eye);
+    vec3.normalize(gaze, gaze);
+    if (turned) {
+        vec3.cross(left, up, gaze);
+        turned = false;
+    }
 }
 
-function strafe(dir){
-  dir = dir * 2 - 1;
-  var left = vec3.create();
-  vec3.cross(left, up, calculate_gaze());
-  left[2] = 0;
-  if (vec3.length(left) != 0)    vec3.normalize(left, left);
-  else vec3.set(left, -1, 0, 0);
-  vec3.scaleAndAdd(eye, eye, left, camera_translation_ratio * dir);
-  vec3.scaleAndAdd(look_at, look_at, left, camera_translation_ratio * dir);
+function strafe(dir) {
+    dir = dir * 2 - 1;
+    var strafe_v = vec3.create();
+    vec3.set(strafe_v, left[0], left[1], 0)
+    if (vec3.length(strafe_v) !== 0) vec3.normalize(strafe_v, strafe_v);
+    else vec3.set(strafe_v, -1, 0, 0);
+    vec3.scaleAndAdd(eye, eye, strafe_v, camera_translation_ratio * dir);
+    vec3.scaleAndAdd(look_at, look_at, strafe_v, camera_translation_ratio * dir);
 }
 
 function move(dir) {
-  dir = dir * 2 - 1;
-  var gaze = calculate_gaze();
-  var forward = vec3.create();
-  vec3.set(forward, gaze[0], gaze[1], 0);
-  if (vec3.length(forward) != 0)    vec3.normalize(forward, forward);
-  else vec3.set(forward, 0, 1, 0);
-  vec3.scaleAndAdd(eye, eye, forward, camera_translation_ratio * dir);
-  vec3.scaleAndAdd(look_at, look_at, forward, camera_translation_ratio * dir);
+    dir = dir * 2 - 1;
+    var forward_v = vec3.create();
+    vec3.set(forward_v, gaze[0], gaze[1], 0);
+    if (vec3.length(forward_v) !== 0) vec3.normalize(forward_v, forward_v);
+    else vec3.set(forward_v, 0, 1, 0);
+    vec3.scaleAndAdd(eye, eye, forward_v, camera_translation_ratio * dir);
+    vec3.scaleAndAdd(look_at, look_at, forward_v, camera_translation_ratio * dir);
 }
 
 function turn(dir) {
-  dir = dir * 2 - 1;
-  var q = quat.create();
-  quat.setAxisAngle(q, up, camera_rotation_ratio * dir);
-  var gaze = calculate_gaze();
-  vec3.transformQuat(gaze, gaze, q);
-  vec3.add(look_at, eye, gaze);
+    dir = dir * 2 - 1;
+    var q = quat.create();
+    quat.setAxisAngle(q, up, camera_rotation_ratio * dir);
+    vec3.transformQuat(gaze, gaze, q);
+    vec3.add(look_at, eye, gaze);
+    turned = true;
 }
 
 function tilt(dir) {
-  dir = dir * 2 - 1;
-  var gaze = calculate_gaze();
-  var right = vec3.create();
-  vec3.cross(right, up, gaze);
-  if (vec3.length(right) != 0)    vec3.normalize(right, right);
-  else vec3.set(right, 1, 0, 0);
-  var q = quat.create();
-  quat.setAxisAngle(q, right, camera_rotation_ratio * dir);
-  vec3.transformQuat(gaze, gaze, q);
-  vec3.add(look_at, eye, gaze);
+    dir = dir * 2 - 1;
+    var q = quat.create();
+    quat.setAxisAngle(q, left, camera_rotation_ratio * dir);
+    vec3.transformQuat(gaze, gaze, q);
+    vec3.add(look_at, eye, gaze);
 }
