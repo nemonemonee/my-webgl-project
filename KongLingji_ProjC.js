@@ -78,54 +78,12 @@ function main() {
 
     gl.enable(gl.DEPTH_TEST);
 
-    /*
-  //----------------SOLVE THE 'REVERSED DEPTH' PROBLEM:------------------------
-    // IF the GPU doesn't transform our vertices by a 3D Camera Projection Matrix
-    // (and it doesn't -- not until Project B) then the GPU will compute reversed
-    // depth values:  depth==0 for vertex z == -1;   (but depth = 0 means 'near')
-    //		    depth==1 for vertex z == +1.   (and depth = 1 means 'far').
-    //
-    // To correct the 'REVERSED DEPTH' problem, we could:
-    //  a) reverse the sign of z before we render it (e.g. scale(1,1,-1); ugh.)
-    //  b) reverse the usage of the depth-buffer's stored values, like this:
-    gl.enable(gl.DEPTH_TEST); // enabled by default, but let's be SURE.
-
-    gl.clearDepth(0.0);       // each time we 'clear' our depth buffer, set all
-                              // pixel depths to 0.0  (1.0 is DEFAULT)
-    gl.depthFunc(gl.GREATER); // draw a pixel only if its depth value is GREATER
-                              // than the depth buffer's stored value.
-                              // (gl.LESS is DEFAULT; reverse it!)
-    //------------------end 'REVERSED DEPTH' fix---------------------------------
-  */
-
     // Initialize each of our 'vboBox' objects:
     worldBox.init(gl);		// VBO + shaders + uniforms + attribs for our 3D world,
     // including ground-plane,
     gouraudBox.init(gl);		//  "		"		"  for 1st kind of shading & lighting
     phongBox.init(gl);    //  "   "   "  for 2nd kind of shading & lighting
-
     setCamera();				// TEMPORARY: set a global camera used by ALL VBObox objects...
-
-    gl.clearColor(0.2, 0.2, 0.2, 1);	  // RGBA color for clearing <canvas>
-
-    // ==============ANIMATION=============
-    // Quick tutorials on synchronous, real-time animation in JavaScript/HTML-5:
-    //    https://webglfundamentals.org/webgl/lessons/webgl-animation.html
-    //  or
-    //  	http://creativejs.com/resources/requestanimationframe/
-    //		--------------------------------------------------------
-    // Why use 'requestAnimationFrame()' instead of the simpler-to-use
-    //	fixed-time setInterval() or setTimeout() functions?  Because:
-    //		1) it draws the next animation frame 'at the next opportunity' instead
-    //			of a fixed time interval. It allows your browser and operating system
-    //			to manage its own processes, power, & computing loads, and to respond
-    //			to on-screen window placement (to skip battery-draining animation in
-    //			any window that was hidden behind others, or was scrolled off-screen)
-    //		2) it helps your program avoid 'stuttering' or 'jittery' animation
-    //			due to delayed or 'missed' frames.  Your program can read and respond
-    //			to the ACTUAL time interval between displayed frames instead of fixed
-    //		 	fixed-time 'setInterval()' calls that may take longer than expected.
-    //------------------------------------
 
     document.addEventListener('keydown', function (event) {
         switch (event.key) {
