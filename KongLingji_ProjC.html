@@ -13,12 +13,48 @@
       <button type="button" onclick="VBO0toggle()">VBO-0 hide/show</button>
       <button type="button" onclick="VBO1toggle()">VBO-1 hide/show</button>
       <button type="button" onclick="VBO2toggle()">VBO-2 hide/show</button>
+
     </p>
+    <fieldset>
+      <legend>Light Controls</legend>
+      <button type="button" onclick="light_switch()">Light Switch</button><BR><BR>
+
+      <legend>Light Position</legend>
+      &nbsp;&nbsp;&nbsp;X:
+        <label for="x-axis"></label>
+        <input type="range" id="x-axis" min="-10" max="10" step="1" value="1" onchange="updateLightX(this.value)"/>
+        <span id="lightX">1</span>
+      &nbsp;&nbsp;&nbsp;Y:
+        <label for="y-axis"></label>
+        <input type="range" id="y-axis" min="-10" max="10" step="1" value="8" onchange="updateLightY(this.value)"/>
+        <span id="lightY">8</span>
+      &nbsp;&nbsp;&nbsp;Z:
+        <label for="z-axis"></label>
+        <input type="range" id="z-axis" min="-10" max="10" step="1" value="9" onchange="updateLightZ(this.value)"/>
+        <span id="lightZ">9</span><BR><BR>
+
+      <legend>Colors</legend>
+      Ambient: <input type="color" id="ambientPicker" value="#194c4c" onchange="updateAmbient(this.value)"/>&nbsp;&nbsp;&nbsp;
+      Ka: <input type="range" id="KaSlider" min="0" max="1" step="0.01" value="1" onchange="updateKa(this.value)"/>
+      <span id="KaValue">1</span><br>
+
+      Diffuse: &nbsp;&nbsp;<input type="color" id="diffusePicker" value="#cccccc" onchange="updateDiffuse(this.value)"/>&nbsp;&nbsp;&nbsp;
+      Kd: <input type="range" id="KdSlider" min="0" max="1" step="0.01" value="1" onchange="updateKd(this.value)"/>
+      <span id="KdValue">1</span><br>
+
+      Specular: <input type="color" id="specularPicker" value="#ffffff" onchange="updateSpecular(this.value)"/>&nbsp;&nbsp;&nbsp;
+      Ks: <input type="range" id="KsSlider" min="0" max="1" step="0.01" value="1" onchange="updateKs(this.value)"/>
+      <span id="KsValue">1</span><br>
+
+      Kshiny: <input type="range" id="KshinySlider" min="1" max="200" step="1" value="4" onchange="updateKshiny(this.value)"/>
+      <span id="KshinyValue">4</span>
+
+    </fieldset>
     <script src="lib/webgl-utils.js"></script>
     <script src="lib/webgl-debug.js"></script>
     <script src="lib/cuon-utils.js"></script>
     <script src="lib/glmatrix.js"></script>
-
+    <script src="lib/materials_Ayerdi04.js"></script>
 
     <script src="JT_VBObox-Lib.js"></script>
     <script src="KongLingji_ProjC.js"></script>

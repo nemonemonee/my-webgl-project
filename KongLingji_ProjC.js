@@ -64,6 +64,17 @@ var left = vec3.create();
 
 var turned = true;
 
+var light_on = true;
+var light_pos = new Float32Array([1, 8, 9]);
+var ambient_col = new Float32Array([.1, .3, .3]);
+var diffuse_col = new Float32Array([.8, .8, .8]);
+var specular_col = new Float32Array([1, 1, 1]);
+
+var isBlinn = false;
+var Ka = 1.0;
+var Kd = 1.0;
+var Ks = 1.0;
+var Kshiny = 4.0;
 
 function main() {
 //=============================================================================
@@ -320,4 +331,72 @@ function tilt(dir) {
     quat.setAxisAngle(q, left, camera_rotation_ratio * dir);
     vec3.transformQuat(gaze, gaze, q);
     vec3.add(look_at, eye, gaze);
+}
+
+function light_switch() {
+    if (light_on) {
+        light_on = false;
+    } else {
+        light_on = true;
+    }
+}
+
+function updateLightX(value) {
+    document.getElementById('lightX').innerHTML = value;
+    light_pos[0] = parseFloat(value);
+}
+function updateLightY(value) {
+    document.getElementById('lightY').innerHTML = value;
+    light_pos[1] = parseFloat(value);
+}
+function updateLightZ(value) {
+    document.getElementById('lightZ').innerHTML = value;
+    light_pos[2] = parseFloat(value);
+}
+
+function hexToRgb(hex) {
+    hex = hex.substring(1);
+    var r = parseInt(hex.substring(0, 2), 16);
+    var g = parseInt(hex.substring(2, 4), 16);
+    var b = parseInt(hex.substring(4, 6), 16);
+    return new Float32Array([r, g, b]);
+}
+function updateAmbient(hex) {
+    var color = hexToRgb(hex);
+    ambient_col[0] = color[0] / 255;
+    ambient_col[1] = color[1] / 255;
+    ambient_col[2] = color[2] / 255;
+}
+
+function updateDiffuse(hex) {
+    var color = hexToRgb(hex);
+    diffuse_col[0] = color[0] / 255;
+    diffuse_col[1] = color[1] / 255;
+    diffuse_col[2] = color[2] / 255;
+}
+function updateSpecular(hex) {
+    var color = hexToRgb(hex);
+    specular_col[0] = color[0] / 255;
+    specular_col[1] = color[1] / 255;
+    specular_col[2] = color[2] / 255;
+}
+
+function updateKa(value) {
+    document.getElementById('KaValue').innerHTML = value;
+    Ka = parseFloat(value);
+}
+
+function updateKd(value) {
+    document.getElementById('KdValue').innerHTML = value;
+    Kd = parseFloat(value);
+}
+
+function updateKs(value) {
+    document.getElementById('KsValue').innerHTML = value;
+    Ks = parseFloat(value);
+}
+
+function updateKshiny(value) {
+    document.getElementById('KshinyValue').innerHTML = value;
+    Kshiny = parseFloat(value);
 }
