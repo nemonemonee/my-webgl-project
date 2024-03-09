@@ -2,17 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>ProjC_04</title>
+    <title>Project C</title>
   </head>
 
   <body onload="main()" onresize="drawAndResize()">
+    
     <canvas id="webgl" width="800" height="400">
     Please use a browser that supports "canvas"
     </canvas>
+
     <p>
-      <button type="button" onclick="VBO0toggle()">VBO-0 hide/show</button>
-      <button type="button" onclick="VBO1toggle()">VBO-1 hide/show</button>
-      <button type="button" onclick="VBO2toggle()">VBO-2 hide/show</button>
+    Shading Option : 
+      <select name="shading-menu" id="shading-select" onchange="updateShading(this.value)">
+        <option value="0">Gouraud Shading</option>
+        <option value="1">Phong Shading</option>
+    </select>
+    &nbsp;&nbsp;&nbsp;
+    Lighting Option : 
+      <select name="lighting-menu" id="lighting-select" onchange="updateLighting(this.value)">
+        <option value="0">Phong Lighting</option>
+        <option value="1">Blinn-Phong Lighting</option>
+      </select>
+    &nbsp;&nbsp;&nbsp;
+    Sphere Material :
+      <select name="material-menu" id="material-select" onchange="updateMaterial(this.value)">
+        <option value="0">matl0</option>
+        <option value="1">matl1</option>
+        <option value="3">matl3</option>
+        <option value="4">matl4</option>
+    </select>
 
     </p>
     <fieldset>

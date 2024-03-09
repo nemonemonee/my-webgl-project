@@ -38,11 +38,7 @@ var g_posMax1 = 1.0;           // max, min allowed positions
 var g_posMin1 = -1.0;
 //---------------
 
-// For mouse/keyboard:------------------------
-var g_show0 = 1;								// 0==Show, 1==Hide VBO0 contents on-screen.
-var g_show1 = 1;								// 	"					"			VBO1		"				"				" 
-var g_show2 = 1;                //  "         "     VBO2    "       "       "
-
+var g_show0 = 1;
 
 g_worldMat = mat4.create();
 var fovy = 40 / 180 * Math.PI;
@@ -70,7 +66,8 @@ var ambient_col = new Float32Array([.1, .3, .3]);
 var diffuse_col = new Float32Array([.8, .8, .8]);
 var specular_col = new Float32Array([1, 1, 1]);
 
-var isBlinn = false;
+var isBlinn = 0;
+var isPhong = 0;
 var Ka = 1.0;
 var Kd = 1.0;
 var Ks = 1.0;
@@ -211,20 +208,20 @@ function drawAll() {
     var b4Draw = Date.now();
     var b4Wait = b4Draw - g_lastMS;
 
-    if (g_show0 == 1) {	// IF user didn't press HTML button to 'hide' VBO0:
-        worldBox.switchToMe();  // Set WebGL to render from this VBObox.
-        worldBox.adjust();		  // Send new values for uniforms to the GPU, and
-        worldBox.draw();			  // draw our VBO's contents using our shaders.
+    if (g_show0 == 1) {
+        worldBox.switchToMe();
+        worldBox.adjust();
+        worldBox.draw();
     }
-    if (g_show1 == 1) { // IF user didn't press HTML button to 'hide' VBO1:
-        gouraudBox.switchToMe();  // Set WebGL to render from this VBObox.
-        gouraudBox.adjust();		  // Send new values for uniforms to the GPU, and
-        gouraudBox.draw();			  // draw our VBO's contents using our shaders.
+    if (isPhong === 0) {
+        gouraudBox.switchToMe();
+        gouraudBox.adjust();
+        gouraudBox.draw();
     }
-    if (g_show2 == 1) { // IF user didn't press HTML button to 'hide' VBO2:
-        phongBox.switchToMe();  // Set WebGL to render from this VBObox.
-        phongBox.adjust();		  // Send new values for uniforms to the GPU, and
-        phongBox.draw();			  // draw our VBO's contents using our shaders.
+    if (isPhong === 1) {
+        phongBox.switchToMe();
+        phongBox.adjust();
+        phongBox.draw();
     }
     /* // ?How slow is our own code?
     var aftrDraw = Date.now();
@@ -247,22 +244,6 @@ function VBO0toggle() {
     if (g_show0 !== 1) g_show0 = 1;				// show,
     else g_show0 = 0;										// hide.
     console.log('g_show0: ' + g_show0);
-}
-
-function VBO1toggle() {
-//=============================================================================
-// Called when user presses HTML-5 button 'Show/Hide VBO1'.
-    if (g_show1 !== 1) g_show1 = 1;			// show,
-    else g_show1 = 0;									// hide.
-    console.log('g_show1: ' + g_show1);
-}
-
-function VBO2toggle() {
-//=============================================================================
-// Called when user presses HTML-5 button 'Show/Hide VBO2'.
-    if (g_show2 !== 1) g_show2 = 1;			// show,
-    else g_show2 = 0;									// hide.
-    console.log('g_show2: ' + g_show2);
 }
 
 function setCamera() {
@@ -331,6 +312,20 @@ function tilt(dir) {
     quat.setAxisAngle(q, left, camera_rotation_ratio * dir);
     vec3.transformQuat(gaze, gaze, q);
     vec3.add(look_at, eye, gaze);
+}
+
+
+function updateShading(value) {
+    isPhong = parseInt(value, 10);
+}
+
+
+function updateLighting(value) {
+    isBlinn = parseInt(value, 10);
+}
+
+function updateMaterial(value) {
+
 }
 
 function light_switch() {
