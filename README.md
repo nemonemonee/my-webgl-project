@@ -1,6 +1,6 @@
 # WebGL Project: Lighting, Shading, and Distortion
 
-![Visit the Website](https://my-webgl-project.netlify.app/)
+[Visit the Website](https://my-webgl-project.netlify.app/)
 
 ## User Guide
 
