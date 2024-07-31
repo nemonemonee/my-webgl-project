@@ -26,17 +26,25 @@
     &nbsp;&nbsp;&nbsp;
     Sphere Material :
       <select name="material-menu" id="material-select" onchange="updateMaterial(this.value)">
-        <option value="0">matl0</option>
-        <option value="1">matl1</option>
-        <option value="3">matl3</option>
-        <option value="4">matl4</option>
+        <option value="20" selected>Pearl</option>
+        <option value="6">Brass</option>
+        <option value="14">Pewter</option>
+        <option value="19">Obsidian</option>
+        <option value="1">Red Plastic</option>
+        <option value="3">Blue Plastic</option>
+        <option value="4">Black Plastic</option>
+        <option value="8">Bronze</option>
+        <option value="11">Copper</option>
+        <option value="16">Silver</option>
+        <option value="13">Gold</option>
+        <option value="17">Emerald</option>
     </select>
-
+    &nbsp;&nbsp;&nbsp;Rabbit Control :
+    <button type="button" onclick="distortion_switch()">Distortion Switch</button>
+    <button type="button" onclick="angle0switch()">Rotation Switch</button>
     </p>
     <fieldset>
       <legend>Light Controls</legend>
-      <button type="button" onclick="light_switch()">Light Switch</button><BR><BR>
-
       <legend>Light Position</legend>
       &nbsp;&nbsp;&nbsp;X:
         <label for="x-axis"></label>
@@ -52,22 +60,27 @@
         <span id="lightZ">9</span><BR><BR>
 
       <legend>Colors</legend>
-      Ambient: <input type="color" id="ambientPicker" value="#194c4c" onchange="updateAmbient(this.value)"/>&nbsp;&nbsp;&nbsp;
-      Ka: <input type="range" id="KaSlider" min="0" max="1" step="0.01" value="1" onchange="updateKa(this.value)"/>
-      <span id="KaValue">1</span><br>
-
+      Ambient: <input type="color" id="ambientPicker" value="#ffffff" onchange="updateAmbient(this.value)"/>&nbsp;&nbsp;&nbsp;
+      <button type="button" onclick="ambi_switch()">Ambient &nbsp;Switch</button>
+      <span id="switchAmb">on</span><BR>
       Diffuse: &nbsp;&nbsp;<input type="color" id="diffusePicker" value="#cccccc" onchange="updateDiffuse(this.value)"/>&nbsp;&nbsp;&nbsp;
-      Kd: <input type="range" id="KdSlider" min="0" max="1" step="0.01" value="1" onchange="updateKd(this.value)"/>
-      <span id="KdValue">1</span><br>
-
-      Specular: <input type="color" id="specularPicker" value="#ffffff" onchange="updateSpecular(this.value)"/>&nbsp;&nbsp;&nbsp;
-      Ks: <input type="range" id="KsSlider" min="0" max="1" step="0.01" value="1" onchange="updateKs(this.value)"/>
-      <span id="KsValue">1</span><br>
-
-      Kshiny: <input type="range" id="KshinySlider" min="1" max="200" step="1" value="4" onchange="updateKshiny(this.value)"/>
-      <span id="KshinyValue">4</span>
-
+      <button type="button" onclick="diff_switch()">Diffuse &nbsp;&nbsp;&nbsp;Switch</button>
+      <span id="switchDif">on</span><BR>
+      Specular: <input type="color" id="specularPicker" value="#cccccc" onchange="updateSpecular(this.value)"/>&nbsp;&nbsp;&nbsp;
+      <button type="button" onclick="spec_switch()">Specular Switch</button>
+      <span id="switchSpc">on</span><BR><BR>
+      <button type="button" onclick="head_switch()">Head Light Switch</button>
+      <span id="switchHed">on</span><BR>
     </fieldset>
+    <p>
+      Camera Controls <BR>
+      &nbsp;&nbsp;&nbsp;W/S: moves the camera forward and backward at a fixed height<BR>
+      &nbsp;&nbsp;&nbsp;A/D: moves the camera left and right at a fixed height<BR>
+      &nbsp;&nbsp;&nbsp;ArrowUp/Down: Aims the camera up and down without moving it<BR>
+      &nbsp;&nbsp;&nbsp;ArrowLeft/Right or Q/E: Aims the camera left and right without moving it<BR>
+      &nbsp;&nbsp;&nbsp;I/O: moves the camera forward and backward in the gaze direction<BR>
+    </p>
+
     <script src="lib/webgl-utils.js"></script>
     <script src="lib/webgl-debug.js"></script>
     <script src="lib/cuon-utils.js"></script>

@@ -60,19 +60,29 @@ var left = vec3.create();
 
 var turned = true;
 
-var light_on = true;
+var light_on_ambi = true;
+var light_on_diff = true;
+var light_on_spec = true;
+var light_on_head = true;
 var light_pos = new Float32Array([1, 8, 9]);
-var ambient_col = new Float32Array([.1, .3, .3]);
+var ambient_col = new Float32Array([1, 1, 1]);
 var diffuse_col = new Float32Array([.8, .8, .8]);
-var specular_col = new Float32Array([1, 1, 1]);
+var specular_col = new Float32Array([.8, .8, .8]);
 
+var ambient_col_head = new Float32Array([.3, .3, .3]);
+var diffuse_col_head = new Float32Array([.2, .2, .2]);
+var specular_col_head = new Float32Array([.4, .4, .4]);
 var isBlinn = 0;
 var isPhong = 0;
-var Ka = 1.0;
-var Kd = 1.0;
-var Ks = 1.0;
-var Kshiny = 4.0;
 
+
+var matl_id = 20;
+
+
+var C = 0;
+var c_rate = 0.1;
+var is_Distort = 1;
+var rab_rotate = 1;
 function main() {
 //=============================================================================
     // Retrieve the HTML-5 <canvas> element where webGL will draw our pictures:
@@ -85,13 +95,11 @@ function main() {
     gl.clearColor(0.2, 0.2, 0.2, 1);	  // RGBA color for clearing <canvas>
 
     gl.enable(gl.DEPTH_TEST);
-
-    // Initialize each of our 'vboBox' objects:
     worldBox.init(gl);		// VBO + shaders + uniforms + attribs for our 3D world,
     // including ground-plane,
     gouraudBox.init(gl);		//  "		"		"  for 1st kind of shading & lighting
     phongBox.init(gl);    //  "   "   "  for 2nd kind of shading & lighting
-    setCamera();				// TEMPORARY: set a global camera used by ALL VBObox objects...
+    setCamera();
 
     document.addEventListener('keydown', function (event) {
         switch (event.key) {
@@ -146,22 +154,14 @@ function main() {
         drawAndResize();               // Draw all the VBObox contents
     };
     tick();
-    drawAndResize();                   // do it again!
+    drawAndResize();
 }
 
 function timerAll() {
-//=============================================================================
-// Find new values for all time-varying parameters used for on-screen drawing
-    // use local variables to find the elapsed time.
     var nowMS = Date.now();             // current time (in milliseconds)
     var elapsedMS = nowMS - g_lastMS;   //
     g_lastMS = nowMS;                   // update for next webGL drawing.
     if (elapsedMS > 1000.0) {
-        // Browsers won't re-draw 'canvas' element that isn't visible on-screen
-        // (user chose a different browser tab, etc.); when users make the browser
-        // window visible again our resulting 'elapsedMS' value has gotten HUGE.
-        // Instead of allowing a HUGE change in all our time-dependent parameters,
-        // let's pretend that only a nominal 1/30th second passed:
         elapsedMS = 1000.0 / 30.0;
     }
     // Find new time-dependent parameters using the current or elapsed time:
@@ -198,17 +198,17 @@ function timerAll() {
         g_posRate1 = -g_posRate1;   // reverse direction of change.
     }
 
+    C += c_rate;
+    C %= 2 * Math.PI;
+
 }
 
 function drawAll() {
-//=============================================================================
-    // Clear on-screen HTML-5 <canvas> object:
-
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     var b4Draw = Date.now();
     var b4Wait = b4Draw - g_lastMS;
 
-    if (g_show0 == 1) {
+    if (g_show0 === 1) {
         worldBox.switchToMe();
         worldBox.adjust();
         worldBox.draw();
@@ -223,11 +223,6 @@ function drawAll() {
         phongBox.adjust();
         phongBox.draw();
     }
-    /* // ?How slow is our own code?
-    var aftrDraw = Date.now();
-    var drawWait = aftrDraw - b4Draw;
-    console.log("wait b4 draw: ", b4Wait, "drawWait: ", drawWait, "mSec");
-    */
 }
 
 function drawAndResize() {
@@ -239,21 +234,15 @@ function drawAndResize() {
 }
 
 function VBO0toggle() {
-//=============================================================================
-// Called when user presses HTML-5 button 'Show/Hide VBO0'.
-    if (g_show0 !== 1) g_show0 = 1;				// show,
-    else g_show0 = 0;										// hide.
+    if (g_show0 !== 1) g_show0 = 1;
+    else g_show0 = 0;
     console.log('g_show0: ' + g_show0);
 }
 
 function setCamera() {
-    gl.viewport(0,
-        0,
-        g_canvasID.width,
-        g_canvasID.height);
+    gl.viewport(0, 0, g_canvasID.width, g_canvasID.height);
     var aspect = g_canvasID.width / g_canvasID.height;
     mat4.identity(g_worldMat);
-    // var aspect = (innerWidth - xtraMargin) / ((innerHeight * .7) - xtraMargin);
     mat4.perspective(projectionMat, fovy, aspect, z_near, z_far);
     updateCamera();
 }
@@ -297,6 +286,12 @@ function move(dir) {
     vec3.scaleAndAdd(look_at, look_at, forward_v, camera_translation_ratio * dir);
 }
 
+function zoom(dir) {
+    dir = dir * 2 - 1;
+    vec3.scaleAndAdd(eye, eye, gaze, camera_translation_ratio * dir);
+    vec3.scaleAndAdd(look_at, look_at, gaze, camera_translation_ratio * dir);
+}
+
 function turn(dir) {
     dir = dir * 2 - 1;
     var q = quat.create();
@@ -325,14 +320,63 @@ function updateLighting(value) {
 }
 
 function updateMaterial(value) {
-
+    matl_id = parseInt(value, 10);
 }
 
-function light_switch() {
-    if (light_on) {
-        light_on = false;
+function head_switch() {
+    if (light_on_head) {
+        light_on_head = false;
+        ambient_head_temp = ambient_col;
+        ambient_col_head = new Float32Array([0,0,0]);
+        diffuse_head_temp = diffuse_col_head;
+        diffuse_col_head = new Float32Array([0,0,0]);
+        speculr_head_temp = specular_col_head;
+        specular_col_head = new Float32Array([0,0,0]);
+        document.getElementById('switchHed').innerHTML = "off";
     } else {
-        light_on = true;
+        light_on_head = true;
+        ambient_col_head = ambient_head_temp;
+        diffuse_col_head = diffuse_head_temp;
+        specular_col_head = speculr_head_temp;
+        document.getElementById('switchHed').innerHTML = "on";
+    }
+}
+function ambi_switch() {
+    if (light_on_ambi) {
+        light_on_ambi = false;
+        ambient_temp = ambient_col;
+        ambient_col = new Float32Array([0,0,0]);
+        document.getElementById('switchAmb').innerHTML = "off";
+    } else {
+        light_on_ambi = true;
+        ambient_col = ambient_temp;
+        document.getElementById('switchAmb').innerHTML = "on";
+    }
+}
+
+function diff_switch() {
+    if (light_on_diff) {
+        light_on_diff = false;
+        diffuse_temp = diffuse_col;
+        diffuse_col = new Float32Array([0,0,0]);
+        document.getElementById('switchDif').innerHTML = "off";
+    } else {
+        light_on_diff = true;
+        diffuse_col = diffuse_temp;
+        document.getElementById('switchDif').innerHTML = "on";
+    }
+}
+
+function spec_switch() {
+    if (light_on_spec) {
+        light_on_spec = false;
+        speculr_temp = specular_col;
+        specular_col = new Float32Array([0,0,0]);
+        document.getElementById('switchSpc').innerHTML = "off";
+    } else {
+        light_on_spec = true;
+        specular_col = speculr_temp;
+        document.getElementById('switchSpc').innerHTML = "on";
     }
 }
 
@@ -376,22 +420,22 @@ function updateSpecular(hex) {
     specular_col[2] = color[2] / 255;
 }
 
-function updateKa(value) {
-    document.getElementById('KaValue').innerHTML = value;
-    Ka = parseFloat(value);
+function distortion_switch() {
+    if (is_Distort === 1) {
+        is_Distort = 0
+    } else {
+        is_Distort = 1
+    }
 }
 
-function updateKd(value) {
-    document.getElementById('KdValue').innerHTML = value;
-    Kd = parseFloat(value);
-}
+function angle0switch() {
+    if (rab_rotate === 1) {
+        rab_rotate = 0;
+        g_angleRate0_temp = g_angleRate0;
+        g_angleRate0 = 0;
+    } else {
+        rab_rotate = 1;
+        g_angleRate0 = g_angleRate0_temp;
+    }
 
-function updateKs(value) {
-    document.getElementById('KsValue').innerHTML = value;
-    Ks = parseFloat(value);
-}
-
-function updateKshiny(value) {
-    document.getElementById('KshinyValue').innerHTML = value;
-    Kshiny = parseFloat(value);
 }
