@@ -1,85 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8" />
-    <title>Project C</title>
-  </head>
+    <title>WebGL Project: Lighting, Shading, and Distortion</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
 
-  <body onload="main()" onresize="drawAndResize()">
-    
-    <canvas id="webgl" width="800" height="400">
-    Please use a browser that supports "canvas"
-    </canvas>
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-    <p>
-    Shading Option : 
-      <select name="shading-menu" id="shading-select" onchange="updateShading(this.value)">
-        <option value="0" selected>Gouraud Shading</option>
-        <option value="1">Phong Shading</option>
-    </select>
-    &nbsp;&nbsp;&nbsp;
-    Lighting Option : 
-      <select name="lighting-menu" id="lighting-select" onchange="updateLighting(this.value)">
-        <option value="0" selected>Phong Lighting</option>
-        <option value="1">Blinn-Phong Lighting</option>
-      </select>
-    &nbsp;&nbsp;&nbsp;
-    Sphere Material :
-      <select name="material-menu" id="material-select" onchange="updateMaterial(this.value)">
-        <option value="20" selected>Pearl</option>
-        <option value="6">Brass</option>
-        <option value="14">Pewter</option>
-        <option value="19">Obsidian</option>
-        <option value="1">Red Plastic</option>
-        <option value="3">Blue Plastic</option>
-        <option value="4">Black Plastic</option>
-        <option value="8">Bronze</option>
-        <option value="11">Copper</option>
-        <option value="16">Silver</option>
-        <option value="13">Gold</option>
-        <option value="17">Emerald</option>
-    </select>
-    &nbsp;&nbsp;&nbsp;Rabbit Control :
-    <button type="button" onclick="distortion_switch()">Distortion Switch</button>
-    <button type="button" onclick="angle0switch()">Rotation Switch</button>
-    </p>
-    <fieldset>
-      <legend>Light Controls</legend>
-      <legend>Light Position</legend>
-      &nbsp;&nbsp;&nbsp;X:
-        <label for="x-axis"></label>
-        <input type="range" id="x-axis" min="-10" max="10" step="1" value="1" onchange="updateLightX(this.value)"/>
-        <span id="lightX">1</span>
-      &nbsp;&nbsp;&nbsp;Y:
-        <label for="y-axis"></label>
-        <input type="range" id="y-axis" min="-10" max="10" step="1" value="8" onchange="updateLightY(this.value)"/>
-        <span id="lightY">8</span>
-      &nbsp;&nbsp;&nbsp;Z:
-        <label for="z-axis"></label>
-        <input type="range" id="z-axis" min="-10" max="10" step="1" value="9" onchange="updateLightZ(this.value)"/>
-        <span id="lightZ">9</span><BR><BR>
+        h1 {
+            font-size: 2.5em;
+            color: #444;
+        }
 
-      <legend>Colors</legend>
-      Ambient: <input type="color" id="ambientPicker" value="#ffffff" onchange="updateAmbient(this.value)"/>&nbsp;&nbsp;&nbsp;
-      <button type="button" onclick="ambi_switch()">Ambient &nbsp;Switch</button>
-      <span id="switchAmb">on</span><BR>
-      Diffuse: &nbsp;&nbsp;<input type="color" id="diffusePicker" value="#cccccc" onchange="updateDiffuse(this.value)"/>&nbsp;&nbsp;&nbsp;
-      <button type="button" onclick="diff_switch()">Diffuse &nbsp;&nbsp;&nbsp;Switch</button>
-      <span id="switchDif">on</span><BR>
-      Specular: <input type="color" id="specularPicker" value="#cccccc" onchange="updateSpecular(this.value)"/>&nbsp;&nbsp;&nbsp;
-      <button type="button" onclick="spec_switch()">Specular Switch</button>
-      <span id="switchSpc">on</span><BR><BR>
-      <button type="button" onclick="head_switch()">Head Light Switch</button>
-      <span id="switchHed">on</span><BR>
-    </fieldset>
-    <p>
-      Camera Controls <BR>
-      &nbsp;&nbsp;&nbsp;W/S: moves the camera forward and backward at a fixed height<BR>
-      &nbsp;&nbsp;&nbsp;A/D: moves the camera left and right at a fixed height<BR>
-      &nbsp;&nbsp;&nbsp;ArrowUp/Down: Aims the camera up and down without moving it<BR>
-      &nbsp;&nbsp;&nbsp;ArrowLeft/Right or Q/E: Aims the camera left and right without moving it<BR>
-      &nbsp;&nbsp;&nbsp;I/O: moves the camera forward and backward in the gaze direction<BR>
-    </p>
+        #controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        #canvas-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            border: 1px solid #ccc;
+            background-color: #fff;
+        }
+
+        fieldset {
+            border: 1px solid #ccc;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 5px;
+            flex-grow: 1;
+            min-width: 300px;
+        }
+
+        legend {
+            font-weight: bold;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
+        }
+
+        .horizontal-control-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .horizontal-control-group label {
+            min-width: 120px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            margin: 0 10px;
+        }
+
+        input[type="color"] {
+            border: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007BFF;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .control-group select {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .control-group label {
+            margin-bottom: 5px;
+        }
+
+        .combined-block {
+            display: flex;
+            flex-grow: 1;
+            gap: 20px;
+        }
+
+        .light-camera-block {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .vertical-control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+    </style>
+</head>
+
+<body onload="main()" onresize="drawAndResize()">
+    <header>
+        <h1>WebGL Project: Dynamic 3D Viewer</h1>
+        <h3>Advanced Lighting, Shading, and Distortion Effects</h3>
+    </header>
+
+    <div id="canvas-container">
+        <canvas id="webgl" width="600" height="300">
+            Please use a browser that supports "canvas"
+        </canvas>
+    </div>
+
+    <div id="controls">
+        <div class="combined-block">
+            <fieldset style="flex-grow: 1;">
+                <legend>Shading and Lighting Options</legend>
+                <div class="control-group">
+                    <label for="shading-select">Select Shading:</label>
+                    <select name="shading-menu" id="shading-select" onchange="updateShading(this.value)">
+                        <option value="0" selected>Gouraud Shading</option>
+                        <option value="1">Phong Shading</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="lighting-select">Select Lighting:</label>
+                    <select name="lighting-menu" id="lighting-select" onchange="updateLighting(this.value)">
+                        <option value="0" selected>Phong Lighting</option>
+                        <option value="1">Blinn-Phong Lighting</option>
+                    </select>
+                </div>
+                <div class="horizontal-control-group">
+                    <label for="x-axis">Light Position X:</label>
+                    <input type="range" id="x-axis" min="-10" max="10" step="1" value="1" onchange="updateLightX(this.value)" />
+                    <span id="lightX">1</span>
+                </div>
+                <div class="horizontal-control-group">
+                    <label for="y-axis">Light Position Y:</label>
+                    <input type="range" id="y-axis" min="-10" max="10" step="1" value="8" onchange="updateLightY(this.value)" />
+                    <span id="lightY">8</span>
+                </div>
+                <div class="horizontal-control-group">
+                    <label for="z-axis">Light Position Z:</label>
+                    <input type="range" id="z-axis" min="-10" max="10" step="1" value="9" onchange="updateLightZ(this.value)" />
+                    <span id="lightZ">9</span>
+                </div>
+            </fieldset>
+
+            <fieldset style="flex-grow: 1;">
+                <legend>Light Color Options</legend>
+                <div class="horizontal-control-group">
+                    <label>Ambient Color:</label>
+                    <input type="color" id="ambientPicker" value="#ffffff" onchange="updateAmbient(this.value)" />
+                    <button type="button" onclick="ambi_switch()">Toggle Ambient</button>
+                    <span id="switchAmb">on</span>
+                </div>
+                <div class="horizontal-control-group">
+                    <label>Diffuse Color:</label>
+                    <input type="color" id="diffusePicker" value="#cccccc" onchange="updateDiffuse(this.value)" />
+                    <button type="button" onclick="diff_switch()">Toggle Diffuse</button>
+                    <span id="switchDif">on</span>
+                </div>
+                <div class="horizontal-control-group">
+                    <label>Specular Color:</label>
+                    <input type="color" id="specularPicker" value="#cccccc" onchange="updateSpecular(this.value)" />
+                    <button type="button" onclick="spec_switch()">Toggle Specular</button>
+                    <span id="switchSpc">on</span>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="combined-block">
+            <fieldset>
+                <legend>Sphere Material Options</legend>
+                <div class="control-group">
+                    <label for="material-select">Select Material:</label>
+                    <select name="material-menu" id="material-select" onchange="updateMaterial(this.value)">
+                        <option value="20" selected>Pearl</option>
+                        <option value="6">Brass</option>
+                        <option value="14">Pewter</option>
+                        <option value="19">Obsidian</option>
+                        <option value="1">Red Plastic</option>
+                        <option value="3">Blue Plastic</option>
+                        <option value="4">Black Plastic</option>
+                        <option value="8">Bronze</option>
+                        <option value="11">Copper</option>
+                        <option value="16">Silver</option>
+                        <option value="13">Gold</option>
+                        <option value="17">Emerald</option>
+                    </select>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Rabbit Controls</legend>
+                <div class="vertical-control-group">
+                    <button type="button" onclick="distortion_switch()">Distortion Switch</button>
+                    <button type="button" onclick="angle0switch()">Rotation Switch</button>
+                </div>
+            </fieldset>
+        </div>
+
+        <fieldset style="flex-grow: 1;">
+            <legend>Camera Controls</legend>
+            <p>W/S: Move camera forward/backward at fixed height</p>
+            <p>A/D: Move camera left/right at fixed height</p>
+            <p>Arrow Up/Down: Aim camera up/down without moving it</p>
+            <p>Arrow Left/Right or Q/E: Aim camera left/right without moving it</p>
+            <p>I/O: Move camera forward/backward in gaze direction</p>
+        </fieldset>
+    </div>
 
     <script src="lib/webgl-utils.js"></script>
     <script src="lib/webgl-debug.js"></script>
@@ -87,7 +245,8 @@
     <script src="lib/glmatrix.js"></script>
     <script src="lib/materials_Ayerdi04.js"></script>
 
-    <script src="JT_VBObox-Lib.js"></script>
-    <script src="KongLingji_ProjC.js"></script>
-  </body>
+    <script src="src/JT_VBObox-Lib.js"></script>
+    <script src="src/main.js"></script>
+</body>
+
 </html>

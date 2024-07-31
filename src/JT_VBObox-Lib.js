@@ -18135,7 +18135,7 @@ VBObox1.prototype.adjust = function() {
     gl.drawArrays(gl.TRIANGLES, sphereStart/7, sphereVerts.length / 7);
 
     // tree
-    mat4.translate(this.ModelMatrix, temp, [2,-1,.5]);
+    mat4.translate(this.ModelMatrix, temp, [-4.5,-1,.3]);
     mat4.rotateZ(this.ModelMatrix, this.ModelMatrix, g_angleNow2 / 180 * Math.PI);
     var curr = mat4.clone(this.ModelMatrix);
     mat4.scale(this.ModelMatrix, this.ModelMatrix, [.1,.1,.5]);
@@ -18199,7 +18199,7 @@ VBObox1.prototype.adjust = function() {
     gl.uniform3fv(this.u_Ks, this.myMatl[18].K_spec.slice(0,3));
     gl.uniform1i(this.u_Kshiny, parseInt(this.myMatl[18].K_shiny, 10));
 
-    mat4.translate(this.ModelMatrix, temp, [-2,1.5,.4]);
+    mat4.translate(this.ModelMatrix, temp, [-1,2,.4]);
     mat4.translate(this.ModelMatrix, this.ModelMatrix, [0, g_posNow0, 0])
     mat4.scale(this.ModelMatrix, this.ModelMatrix, [.6,.6,.6]);
     curr = mat4.clone(this.ModelMatrix);
@@ -18273,7 +18273,7 @@ VBObox1.prototype.adjust = function() {
     gl.uniform3fv(this.u_Ks, this.myMatl[9].K_spec.slice(0,3));
     gl.uniform1i(this.u_Kshiny, parseInt(this.myMatl[9].K_shiny, 10));
 
-    mat4.translate(this.ModelMatrix, temp, [4,-2,0]);
+    mat4.translate(this.ModelMatrix, temp, [2,-1.5,0]);
 
     //mat4.rotateZ(this.ModelMatrix, this.ModelMatrix, g_angleNow0 / 180 * Math.PI);
 
