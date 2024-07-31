@@ -1,6 +1,6 @@
 # WebGL Project: Lighting, Shading, and Distortion
 
-![Visit the Website](https://my-webgl-project.netlify.app/ "Click to visit the WebGL project site")
+![Visit the Website]("https://my-webgl-project.netlify.app/")
 
 ## User Guide
 
@@ -31,4 +31,4 @@
 
 ## Scene Graph
 
-![Scene Graph]("scene.png")
+![Scene Graph](scene.png)
