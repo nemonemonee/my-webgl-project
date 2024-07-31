@@ -1,4 +1,4 @@
-# WebGL Project: Dynamic 3D Viewer with Lighting, Shading, and Distortion Effects
+# WebGL Project: Lighting, Shading, and Distortion
 
 ## User Guide
 
@@ -27,16 +27,6 @@
   - **Lamp Light**: Users can change its location and its ambient, diffuse, and specular colors. Users can also turn each part on and off separately.
   - **Head Light**: Users can only turn it on or off, controlled by the headlight switch button.
 
-## Results
-
-- The first picture shows Gouraud shading with Phong lighting, while the second picture shows Gouraud shading with Blinn-Phong lighting. Notice the specular term is not circular even though the sphere is very smooth.
-
-- The third picture shows Phong shading with Phong lighting, while the fourth picture shows Phong shading with Blinn-Phong lighting. These two pictures demonstrate how we can change the materials of the sphere, with 12 materials to choose from.
-
-- These three pictures demonstrate the light controls. The first one shows only the headlight on: the headlight is a weak light source, but it is easy to notice the specular term at the center of the smooth sphere. The second picture shows no light on. The third picture shows the headlight on and the specular light from the lamp is on, which is changed to pink, clearly noticeable.
-
-- There are more interesting things happening, such as the distortion of the rabbit. It is hard to show this with pictures, so remember to check it out!
-
 ## Scene Graph
 
-[Your scene graph description goes here.]
+![Scene Graph]("scene.png")
